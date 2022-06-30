@@ -17,7 +17,7 @@ export default function App() {
         </div>
 
         <div className="bio">
-        I am farza and I worked on self-driving cars so that's pretty cool right? Connect your Ethereum wallet and wave at me!
+        I am vish. I'm working on new web3 projects. Getting started with some solidity experience here. Connect your Ethereum wallet!
         </div>
 
         <button className="waveButton" onClick={wave}>
