@@ -5,6 +5,7 @@ import wavePortalAbi from "./utils/WavePortal.json";
 
 export default function App() {
   const [currentAccount, setCurrentAccount] = React.useState("");
+  const [transactionStatus, setTransactionStatus] = React.useState({});
 
   const contractAddress = "0x4323394ba3808f0Fc4F56A217cda84b869B5408F"; // Goerli
   const contractABI = wavePortalAbi.abi;
@@ -64,9 +65,17 @@ export default function App() {
 
         const waveTxn = await wavePortalContract.wave();
         console.log("Mining...", waveTxn.hash);
+        setTransactionStatus(prevStatus => ({
+          ...prevStatus,
+          [waveTxn.hash]: "loading",
+        }));
 
         await waveTxn.wait();
         console.log("Mined -- ", waveTxn.hash);
+        setTransactionStatus(prevStatus => ({
+          ...prevStatus,
+          [waveTxn.hash]: "mined",
+        }));
 
         count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count...", count.toNumber());
@@ -99,6 +108,15 @@ export default function App() {
             Connect Wallet
           </button>
         )}
+
+        {
+          Object.entries(transactionStatus).map(([key, value]) => (
+            <div key={ key }>
+              <strong>{ key }</strong>
+              <p>{ value }</p>
+            </div>
+          ))
+        }
       </div>
     </div>
   );
