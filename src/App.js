@@ -6,8 +6,10 @@ import wavePortalAbi from "./utils/WavePortal.json";
 export default function App() {
   const [currentAccount, setCurrentAccount] = React.useState("");
   const [transactionStatus, setTransactionStatus] = React.useState({});
+  const [currentMessage, setCurrentMessage] = React.useState("");
+  const [allWaves, setAllWaves] = React.useState([]);
 
-  const contractAddress = "0x4323394ba3808f0Fc4F56A217cda84b869B5408F"; // Goerli
+  const contractAddress = "0xEd84ceDDF111AbFb7bF5E182855a3b98a6F5537b"; // Goerli
   const contractABI = wavePortalAbi.abi;
 
   const checkIfWalletIsConnected = async () => {
@@ -24,6 +26,7 @@ export default function App() {
         const account = accounts[0];
         console.log("Found authorized account: ", account);
         setCurrentAccount(account);
+        getAllWaves();
       } else {
         console.log("No authorized account found.");
       }
@@ -63,8 +66,10 @@ export default function App() {
         let count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count...", count.toNumber());
 
-        const waveTxn = await wavePortalContract.wave();
+        const waveTxn = await wavePortalContract.wave(currentMessage);
+        alert(`Submitted message: ${ currentMessage }`);
         console.log("Mining...", waveTxn.hash);
+        setCurrentMessage("");
         setTransactionStatus(prevStatus => ({
           ...prevStatus,
           [waveTxn.hash]: "loading",
@@ -79,6 +84,33 @@ export default function App() {
 
         count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count...", count.toNumber());
+        getAllWaves();
+      } else {
+        console.log("Ethereum object doesn't exist.");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const getAllWaves = async () => {
+    try {
+      const {ethereum} = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+
+        const waves = await wavePortalContract.getAllWaves();
+        console.log("getAllWaves", waves);
+
+        let wavesCleaned = waves.map((wave) => ({
+          address: wave.waver,
+          timestamp: new Date(wave.timestamp * 1000),
+          message: wave.message,
+        }));
+
+        setAllWaves(wavesCleaned);
       } else {
         console.log("Ethereum object doesn't exist.");
       }
@@ -114,6 +146,25 @@ export default function App() {
             <div key={ key }>
               <strong>{ key }</strong>
               <p>{ value }</p>
+            </div>
+          ))
+        }
+
+        <input
+          type="text"
+          placeholder="Message..."
+          value={ currentMessage }
+          onChange={ (e) => setCurrentMessage(e.target.value) }
+        />
+        {
+          allWaves.map((wave, index) => (
+            <div
+              key={ index.toString() }
+              style={{ backgroundColor: "grey", marginTop: "16px", padding: "8px" }}
+            >
+                <div>Address: { wave.address }</div>
+                <div>Time: { wave.timestamp.toString() }</div>
+                <div>Messages: { wave.message }</div>
             </div>
           ))
         }
