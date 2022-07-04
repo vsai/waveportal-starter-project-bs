@@ -66,7 +66,7 @@ export default function App() {
         let count = await wavePortalContract.getTotalWaves();
         console.log("Retrieved total wave count...", count.toNumber());
 
-        const waveTxn = await wavePortalContract.wave(currentMessage);
+        const waveTxn = await wavePortalContract.wave(currentMessage, { gasLimit: 300000 });
         alert(`Submitted message: ${ currentMessage }`);
         console.log("Mining...", waveTxn.hash);
         setCurrentMessage("");
@@ -118,6 +118,36 @@ export default function App() {
       console.error(error);
     }
   }
+
+  React.useEffect(() => {
+    let wavePortalContract;
+
+    const onNewWave = (from, timestamp, message) => {
+      console.log("NewWave", from, timestamp, message);
+      setAllWaves(prevState => [
+        ...prevState,
+        {
+          address: from,
+          timestamp: new Date(timestamp * 1000),
+          message: message,
+        }
+      ]);
+    }
+
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+      wavePortalContract.on("NewWave", onNewWave);
+    }
+
+    return () => {
+      if (wavePortalContract) {
+        wavePortalContract.off("NewWave", onNewWave);
+      }
+    }
+  }, []);
   
   return (
     <div className="mainContainer">
