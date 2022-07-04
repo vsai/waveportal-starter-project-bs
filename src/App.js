@@ -148,6 +148,21 @@ export default function App() {
       }
     }
   }, []);
+
+  const renderMessages = () => {
+    return allWaves.map((wave, index) => (
+      <div
+        key={ index.toString() }
+        className={`message ${ (wave.address.toLowerCase()===currentAccount.toLowerCase()) ? "from_me" : "from_other" }`}
+      >
+          <div><strong>From: { wave.address }</strong></div>
+          <br></br>
+          <div>Message: { wave.message }</div>
+          <br></br>
+          <span className="timestamp">{ wave.timestamp.toString() }</span>
+      </div>
+    ));
+  }
   
   return (
     <div className="mainContainer">
@@ -186,18 +201,9 @@ export default function App() {
           value={ currentMessage }
           onChange={ (e) => setCurrentMessage(e.target.value) }
         />
-        {
-          allWaves.map((wave, index) => (
-            <div
-              key={ index.toString() }
-              style={{ backgroundColor: "grey", marginTop: "16px", padding: "8px" }}
-            >
-                <div>Address: { wave.address }</div>
-                <div>Time: { wave.timestamp.toString() }</div>
-                <div>Messages: { wave.message }</div>
-            </div>
-          ))
-        }
+        <div>
+          { renderMessages() }
+        </div>
       </div>
     </div>
   );
