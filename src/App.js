@@ -9,7 +9,7 @@ export default function App() {
   const [currentMessage, setCurrentMessage] = React.useState("");
   const [allWaves, setAllWaves] = React.useState([]);
 
-  const contractAddress = "0x0cC274888Af18A4A2ce3F51E1339EF7F9C1D888B"; // Goerli
+  const contractAddress = "0x7A4Ded0badEEe9b429cB2742E62acea40A9439B3"; // Goerli
   const contractABI = wavePortalAbi.abi;
 
   const checkIfWalletIsConnected = async () => {
